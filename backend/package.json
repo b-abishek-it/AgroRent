@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "backend",
   "version": "1.0.0",
   "main": "server.js",
@@ -21,20 +20,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-=======
-  "name": "agroRent",
-  "private": true,
-  "version": "1.0.0",
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
-  "scripts": {
-    "dev": "concurrently \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
-    "build": "npm run build --workspace frontend"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
->>>>>>> 7b99d7f244dffa5f1c261fc2343b162551007db7
   }
 }
