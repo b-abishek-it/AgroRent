@@ -5,28 +5,44 @@ const path = require("path");
 const fs = require("fs");
 const connectDB = require("./config/db");
 
+// Load .env
+const result = dotenv.config({
+  path: path.join(__dirname, ".env"),
+  override: true,
+});
+
+// Debug
+console.log("Current Folder:", __dirname);
+console.log("Dotenv Result:", result);
+console.log("MONGO_URI:", process.env.MONGO_URI);
+
 const authRoutes = require("./routes/authRoutes");
 const machineRoutes = require("./routes/machineRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 
-dotenv.config({ path: path.join(__dirname, ".env"), override: true });
+// Connect Database
 connectDB();
 
 const app = express();
 
 const uploadsPath = path.join(__dirname, "uploads");
+
 if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath);
 }
 
 app.use(cors());
 app.use(express.json());
+
 app.use("/uploads", express.static(uploadsPath));
 
 app.get("/", (req, res) => {
-  res.json({ message: "AgroRent API running" });
+  res.json({
+    success: true,
+    message: "AgroRent API Running",
+  });
 });
 
 app.use("/api/auth", authRoutes);
@@ -36,8 +52,16 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
 app.use((err, req, res, next) => {
-  return res.status(500).json({ message: err.message || "Server error" });
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message,
+  });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
