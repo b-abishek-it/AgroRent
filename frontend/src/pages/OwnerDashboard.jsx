@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api, locations, machineTypes, FILE_BASE } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -125,13 +124,11 @@ const OwnerDashboard = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-6xl mx-auto p-4 space-y-8">
+      <div className="mx-auto max-w-6xl space-y-8 p-4 sm:py-6">
         <p className="text-slate-600">Owner ID: {user?.ownerId || "N/A"}</p>
         <section className="card">
           <h2 className="text-xl font-bold mb-3">{t("addMachinery")}</h2>
-          <form onSubmit={submitMachine} className="grid md:grid-cols-2 gap-3">
+          <form onSubmit={submitMachine} className="grid gap-3 md:grid-cols-2">
             <input className="input" placeholder={t("machineName")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
               {machineTypes.map((type) => <option key={type}>{type}</option>)}
@@ -150,17 +147,17 @@ const OwnerDashboard = () => {
             <input className="input" placeholder={t("driverLicenseNumber")} value={form.driverLicenseNumber} onChange={(e) => setForm({ ...form, driverLicenseNumber: e.target.value })} required />
             <input className="input" placeholder={t("driverPhoneNumber")} value={form.driverPhoneNumber} onChange={(e) => setForm({ ...form, driverPhoneNumber: e.target.value })} required />
             <input className="input" type="file" accept="image/*" onChange={(e) => setForm({ ...form, image: e.target.files[0] })} />
-            <button className="btn-primary md:col-span-2">{editId ? t("updateMachinery") : t("addMachinery")}</button>
+            <button className="btn-primary w-full md:col-span-2">{editId ? t("updateMachinery") : t("addMachinery")}</button>
           </form>
         </section>
 
         <section>
           <h2 className="text-xl font-bold mb-3">{t("myMachinery")}</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {machines.map((machine) => (
               <div className="card" key={machine._id}>
                 <p className="text-xs text-slate-500">Machine ID: {machine.machineCode || machine._id}</p>
-                <img src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"} alt={machine.name} className="w-full h-40 rounded object-cover" />
+                <img src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"} alt={machine.name} className="h-40 w-full rounded object-cover sm:h-44" />
                 <h3 className="font-semibold mt-2">{machine.name}</h3>
                 <p>{machine.type}</p>
                 <p>{machine.location}</p>
@@ -169,9 +166,9 @@ const OwnerDashboard = () => {
                 <p>{t("driverName")}: {machine.driverName}</p>
                 <p>INR {machine.price} / {machine.priceUnit}</p>
                 <p className={machine.verified ? "text-green-600" : "text-amber-600"}>{machine.verified ? t("verified") : t("pendingVerification")}</p>
-                <div className="flex gap-2 mt-2">
-                  <button className="btn-outline" onClick={() => onEdit(machine)}>{t("edit")}</button>
-                  <button className="btn-primary" onClick={() => deleteMachine(machine._id)}>{t("delete")}</button>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <button className="btn-outline w-full sm:w-auto" onClick={() => onEdit(machine)}>{t("edit")}</button>
+                  <button className="btn-primary w-full sm:w-auto" onClick={() => deleteMachine(machine._id)}>{t("delete")}</button>
                 </div>
               </div>
             ))}
@@ -180,7 +177,7 @@ const OwnerDashboard = () => {
 
         <section>
           <h2 className="text-xl font-bold mb-3">{t("bookingRequests")}</h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {bookings.map((booking) => (
               <div key={booking._id} className="card">
                 <p className="text-xs text-slate-500">Booking ID: {booking.bookingCode || booking._id}</p>
@@ -191,12 +188,12 @@ const OwnerDashboard = () => {
                 <p>{t("duration")}: {booking.durationHours} hr</p>
                 <p>Farmer Location: {booking.farmerId?.location}</p>
                 <p>{t("status")}: {booking.status}</p>
-                <div className="flex gap-2 mt-3">
-                  {["Pending", "Waiting"].includes(booking.status) && <button className="btn-primary" onClick={() => approveBooking(booking._id)}>{t("approveBooking")}</button>}
-                  {["Pending", "Waiting", "CancellationRequested"].includes(booking.status) && <button className="btn-outline" onClick={() => rejectBooking(booking._id)}>{t("rejectBooking")}</button>}
-                  {booking.status === "CancellationRequested" && <button className="btn-primary" onClick={() => approveCancellation(booking._id)}>{t("approveCancel")}</button>}
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  {["Pending", "Waiting"].includes(booking.status) && <button className="btn-primary w-full sm:w-auto" onClick={() => approveBooking(booking._id)}>{t("approveBooking")}</button>}
+                  {["Pending", "Waiting", "CancellationRequested"].includes(booking.status) && <button className="btn-outline w-full sm:w-auto" onClick={() => rejectBooking(booking._id)}>{t("rejectBooking")}</button>}
+                  {booking.status === "CancellationRequested" && <button className="btn-primary w-full sm:w-auto" onClick={() => approveCancellation(booking._id)}>{t("approveCancel")}</button>}
                   {booking.paymentCompletedAt && (
-                    <button className="btn-outline" onClick={() => downloadInvoice(booking._id)}>{t("downloadInvoice")}</button>
+                    <button className="btn-outline w-full sm:w-auto" onClick={() => downloadInvoice(booking._id)}>{t("downloadInvoice")}</button>
                   )}
                 </div>
               </div>
@@ -204,7 +201,6 @@ const OwnerDashboard = () => {
           </div>
         </section>
       </div>
-    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api, locations } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -30,9 +29,8 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-md mx-auto mt-10 card">
+      <div className="mx-auto mt-6 w-full max-w-md px-4 sm:mt-10">
+      <div className="card">
         <h2 className="text-2xl font-bold mb-4">{t("registerTitle")}</h2>
         <form onSubmit={submit} className="space-y-3">
           <input className="input" name="name" placeholder={t("fullName")} onChange={onChange} required />
@@ -55,7 +53,7 @@ const Register = () => {
           {t("alreadyAccount")} <Link to="/login" className="text-brand-700">{t("navLogin")}</Link>
         </p>
       </div>
-    </div>
+      </div>
   );
 };
 

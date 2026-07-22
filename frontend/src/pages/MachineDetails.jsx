@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api, FILE_BASE } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -105,21 +104,16 @@ const MachineDetails = () => {
 
   if (!machine) {
     return (
-      <div>
-        <Navbar />
-        <p className="max-w-6xl mx-auto p-4">Loading...</p>
-      </div>
+      <p className="mx-auto max-w-6xl p-4">Loading...</p>
     );
   }
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-5xl mx-auto p-4 grid md:grid-cols-2 gap-6 mt-6">
+      <div className="mx-auto mt-4 grid max-w-5xl gap-6 p-4 sm:mt-6 md:grid-cols-2">
         <img
           src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"}
           alt={machine.name}
-          className="w-full h-80 object-cover rounded-xl"
+          className="h-56 w-full rounded-xl object-cover sm:h-72 md:h-80"
         />
         <div className="card">
           <h2 className="text-2xl font-bold">{machine.name}</h2>
@@ -163,7 +157,6 @@ const MachineDetails = () => {
           {message && <p className="mt-3 text-sm">{message}</p>}
         </div>
       </div>
-    </div>
   );
 };
 

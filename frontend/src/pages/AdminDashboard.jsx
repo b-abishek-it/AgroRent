@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -67,18 +66,16 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-6xl mx-auto p-4 space-y-8">
-        <section className="grid md:grid-cols-3 gap-4">
+      <div className="mx-auto max-w-6xl space-y-8 p-4 sm:py-6">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="card"><p className="text-slate-600">{t("totalUsers")}</p><p className="text-3xl font-bold">{stats.totalUsers}</p></div>
           <div className="card"><p className="text-slate-600">{t("totalMachines")}</p><p className="text-3xl font-bold">{stats.totalMachines}</p></div>
           <div className="card"><p className="text-slate-600">{t("totalRevenue")}</p><p className="text-3xl font-bold">INR {stats.totalRevenue.toFixed(2)}</p></div>
         </section>
 
-        <section className="card overflow-x-auto">
+        <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("farmerTable")}</h2>
-          <table className="w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[700px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Farmer ID</th>
@@ -103,12 +100,12 @@ const AdminDashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
 
-        <section className="card overflow-x-auto">
+        <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("ownerTable")}</h2>
-          <table className="w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[700px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Owner ID</th>
@@ -133,12 +130,12 @@ const AdminDashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
 
-        <section className="card overflow-x-auto">
+        <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("machineTable")}</h2>
-          <table className="w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[1200px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Machine ID</th>
@@ -177,12 +174,12 @@ const AdminDashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
 
-        <section className="card overflow-x-auto">
+        <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("bookingTable")}</h2>
-          <table className="w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[1200px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Booking ID</th>
@@ -219,12 +216,12 @@ const AdminDashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
 
-        <section className="card overflow-x-auto">
+        <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("feedbackTable")}</h2>
-          <table className="w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[650px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Feedback ID</th>
@@ -245,10 +242,9 @@ const AdminDashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </section>
       </div>
-    </div>
   );
 };
 

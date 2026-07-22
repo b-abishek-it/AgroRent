@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api } from "../api";
 
 const formatCurrency = (amount) =>
@@ -65,9 +64,7 @@ const PaymentPage = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-4xl mx-auto p-4">
+      <div className="mx-auto max-w-4xl p-4 sm:py-6">
         <div className="card space-y-6">
           <div className="border-b border-slate-200 pb-4">
             <p className="text-sm font-semibold text-brand-700">Razorpay Payment</p>
@@ -125,16 +122,16 @@ const PaymentPage = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <button
-                  className="btn-outline"
+                  className="btn-outline w-full sm:w-auto"
                   onClick={() => navigate(-1)}
                   type="button"
                 >
                   Back
                 </button>
                 <button
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                   onClick={handlePayment}
                   disabled={isPaying || Boolean(booking.paymentCompletedAt)}
                   type="button"
@@ -146,7 +143,6 @@ const PaymentPage = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 

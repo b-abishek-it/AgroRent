@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import MachineCard from "../components/MachineCard";
 import { api, locations, machineTypes } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -22,11 +21,9 @@ const SearchMachine = () => {
   }, []);
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <h2 className="text-2xl font-bold mb-4">{t("searchMachinery")}</h2>
-        <div className="grid md:grid-cols-4 gap-3 mb-6">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 mb-6">
           <select className="input" value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">{t("allTypes")}</option>
             {machineTypes.map((type) => (
@@ -39,16 +36,15 @@ const SearchMachine = () => {
               <option key={location} value={location}>{location}</option>
             ))}
           </select>
-          <button className="btn-primary" onClick={loadMachines}>{t("applyFilters")}</button>
+          <button className="btn-primary w-full" onClick={loadMachines}>{t("applyFilters")}</button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {machines.map((machine) => (
             <MachineCard key={machine._id} machine={machine} />
           ))}
         </div>
       </div>
-    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import BookingCard from "../components/BookingCard";
 import { api } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -72,9 +71,7 @@ const FarmerDashboard = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-6xl mx-auto p-4">
+      <div className="mx-auto max-w-6xl p-4 sm:py-6">
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <h2 className="text-2xl font-bold">
             Welcome {user?.name} {user?.farmerId ? `(${user.farmerId})` : ""}
@@ -82,7 +79,7 @@ const FarmerDashboard = () => {
         </div>
 
         <h3 className="text-xl font-semibold mt-6 mb-3">{t("bookingHistory")}</h3>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {bookings.map((booking) => (
             <BookingCard key={booking._id} booking={booking}>
               <div className="mt-3 flex flex-wrap gap-3">
@@ -115,7 +112,7 @@ const FarmerDashboard = () => {
           ))}
         </div>
 
-        <div className="card mt-8 max-w-xl">
+        <div className="card mt-8 w-full max-w-xl">
           <h3 className="text-lg font-semibold mb-2">{t("submitFeedback")}</h3>
           <form onSubmit={submitFeedback} className="space-y-2">
             <input
@@ -132,12 +129,11 @@ const FarmerDashboard = () => {
               onChange={(e) => setFeedback({ ...feedback, description: e.target.value })}
               required
             />
-            <button className="btn-primary">{t("submit")}</button>
+            <button className="btn-primary w-full sm:w-auto">{t("submit")}</button>
           </form>
           {message && <p className="mt-2 text-sm">{message}</p>}
         </div>
       </div>
-    </div>
   );
 };
 

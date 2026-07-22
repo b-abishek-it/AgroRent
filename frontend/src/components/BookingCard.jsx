@@ -4,8 +4,8 @@ const BookingCard = ({ booking, children }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="card">
-      <p className="text-xs text-slate-500">{t("bookingId")}: {booking.bookingCode || booking._id}</p>
+    <div className="card min-w-0">
+      <p className="break-all text-xs text-slate-500">{t("bookingId")}: {booking.bookingCode || booking._id}</p>
       <h4 className="font-semibold text-lg">{booking.machineId?.name || "Machine"}</h4>
       <p className="text-sm text-slate-600">{t("fromTime")}: {booking.fromTime}</p>
       <p className="text-sm text-slate-600">{t("toTime")}: {booking.toTime}</p>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { api } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -49,9 +48,8 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="max-w-md mx-auto mt-10 card">
+      <div className="mx-auto mt-6 w-full max-w-md px-4 sm:mt-10">
+      <div className="card">
         <h2 className="text-2xl font-bold mb-4">{t("loginTitle")}</h2>
         <form onSubmit={submitLogin} className="space-y-3">
           <select name="role" value={form.role} onChange={onChange} className="input">
@@ -101,7 +99,7 @@ const Login = () => {
           {t("newUser")} <Link to="/register" className="text-brand-700">{t("navRegister")}</Link>
         </p>
       </div>
-    </div>
+      </div>
   );
 };
 
