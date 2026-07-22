@@ -6,6 +6,7 @@ const {
   getMachinesForVerification,
   getAllMachines,
   verifyMachine,
+  rejectMachine,
 } = require("../controllers/adminController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -19,5 +20,6 @@ router.put("/users/:id/block", blockUser);
 router.get("/machines/pending", getMachinesForVerification);
 router.get("/machines/all", getAllMachines);
 router.put("/machines/:id/verify", verifyMachine);
+router.put("/machines/:id/reject", rejectMachine);
 
 module.exports = router;

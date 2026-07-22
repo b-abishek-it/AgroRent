@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const https = require("https");
 const PDFDocument = require("pdfkit");
 
 const INVOICE_LABELS = {
@@ -77,6 +78,24 @@ const buildInvoiceLines = ({ booking, lang = "en" }) => {
   };
 };
 
+const fetchCloudinaryImage = (url) =>
+  new Promise((resolve, reject) => {
+    if (!url || !url.startsWith("https://res.cloudinary.com/")) return resolve(null);
+
+    https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          response.resume();
+          return reject(new Error("Unable to download machine image"));
+        }
+
+        const chunks = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => resolve(Buffer.concat(chunks)));
+      })
+      .on("error", reject);
+  });
+
 const createInvoiceBuffer = ({ booking, lang = "en" }) =>
   new Promise((resolve, reject) => {
     try {
@@ -88,11 +107,26 @@ const createInvoiceBuffer = ({ booking, lang = "en" }) =>
       doc.on("end", () => resolve(Buffer.concat(chunks)));
       doc.on("error", reject);
 
-      doc.fontSize(18).text(labels.title, { underline: true });
-      doc.moveDown();
-      doc.fontSize(12);
-      lines.forEach((line) => doc.text(line));
-      doc.end();
+      const renderInvoice = async () => {
+        doc.fontSize(18).text(labels.title, { underline: true });
+        doc.moveDown();
+
+        try {
+          const image = await fetchCloudinaryImage(booking.machineId?.image);
+          if (image) {
+            doc.image(image, { fit: [180, 120], align: "center" });
+            doc.moveDown();
+          }
+        } catch {
+          // A transient image-download failure must not prevent invoice generation.
+        }
+
+        doc.fontSize(12);
+        lines.forEach((line) => doc.text(line));
+        doc.end();
+      };
+
+      renderInvoice().catch(reject);
     } catch (error) {
       reject(error);
     }

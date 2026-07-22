@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, locations, machineTypes, FILE_BASE } from "../api";
+import { api, locations, machineTypes, getMachineImageUrl } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const OwnerDashboard = () => {
@@ -157,7 +157,7 @@ const OwnerDashboard = () => {
             {machines.map((machine) => (
               <div className="card" key={machine._id}>
                 <p className="text-xs text-slate-500">Machine ID: {machine.machineCode || machine._id}</p>
-                <img src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"} alt={machine.name} className="h-40 w-full rounded object-cover sm:h-44" />
+                <img src={getMachineImageUrl(machine.image)} alt={machine.name} className="h-40 w-full rounded object-cover sm:h-44" />
                 <h3 className="font-semibold mt-2">{machine.name}</h3>
                 <p>{machine.type}</p>
                 <p>{machine.location}</p>

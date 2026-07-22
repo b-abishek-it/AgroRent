@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FILE_BASE } from "../api";
+import { getMachineImageUrl } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const MachineCard = ({ machine }) => {
@@ -8,7 +8,7 @@ const MachineCard = ({ machine }) => {
   return (
     <div className="card flex h-full flex-col">
       <img
-        src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"}
+        src={getMachineImageUrl(machine.image)}
         alt={machine.name}
         className="h-44 w-full rounded-lg object-cover sm:h-48"
       />

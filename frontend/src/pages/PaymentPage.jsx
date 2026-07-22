@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api } from "../api";
+import { api, getMachineImageUrl } from "../api";
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("en-IN", {
@@ -97,6 +97,7 @@ const PaymentPage = () => {
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2 rounded-xl border border-slate-200 p-4">
+                  {booking.machineId?.image && <img src={getMachineImageUrl(booking.machineId.image)} alt={booking.machineId?.name || "Machine"} className="mb-3 h-44 w-full rounded-lg object-cover" />}
                   <h2 className="text-lg font-semibold text-slate-900">Booking Details</h2>
                   <p><span className="font-medium">Booking ID:</span> {booking.bookingCode || booking._id}</p>
                   <p><span className="font-medium">Machine:</span> {booking.machineId?.name || "Machine"}</p>

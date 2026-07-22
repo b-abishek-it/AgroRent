@@ -79,9 +79,25 @@ const verifyMachine = async (req, res) => {
     if (!machine) return res.status(404).json({ message: "Machine not found" });
 
     machine.verified = true;
+    machine.verificationStatus = "Approved";
     await machine.save();
 
     return res.json({ message: "Machine verified" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const rejectMachine = async (req, res) => {
+  try {
+    const machine = await Machine.findById(req.params.id);
+    if (!machine) return res.status(404).json({ message: "Machine not found" });
+
+    machine.verified = false;
+    machine.verificationStatus = "Rejected";
+    await machine.save();
+
+    return res.json({ message: "Machine rejected" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -94,4 +110,5 @@ module.exports = {
   getMachinesForVerification,
   getAllMachines,
   verifyMachine,
+  rejectMachine,
 };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api, FILE_BASE } from "../api";
+import { api, getMachineImageUrl } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const MachineDetails = () => {
@@ -111,7 +111,7 @@ const MachineDetails = () => {
   return (
       <div className="mx-auto mt-4 grid max-w-5xl gap-6 p-4 sm:mt-6 md:grid-cols-2">
         <img
-          src={machine.image ? `${FILE_BASE}${machine.image}` : "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600"}
+          src={getMachineImageUrl(machine.image)}
           alt={machine.name}
           className="h-56 w-full rounded-xl object-cover sm:h-72 md:h-80"
         />

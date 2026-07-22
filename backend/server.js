@@ -2,19 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
-const fs = require("fs");
 const connectDB = require("./config/db");
 
 // Load .env
-const result = dotenv.config({
+dotenv.config({
   path: path.join(__dirname, ".env"),
   override: true,
 });
 
-// Debug
-console.log("Current Folder:", __dirname);
-console.log("Dotenv Result:", result);
-console.log("MONGO_URI:", process.env.MONGO_URI);
 
 const authRoutes = require("./routes/authRoutes");
 const machineRoutes = require("./routes/machineRoutes");
@@ -26,17 +21,12 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 connectDB();
 
 const app = express();
-
-const uploadsPath = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath);
-}
+const legacyUploadsPath = path.join(__dirname, "uploads");
 
 app.use(cors());
 app.use(express.json());
-
-app.use("/uploads", express.static(uploadsPath));
+// Read-only compatibility for machine records created before Cloudinary migration.
+app.use("/uploads", express.static(legacyUploadsPath));
 
 app.get("/", (req, res) => {
   res.json({

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api";
+import { api, getMachineImageUrl } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const AdminDashboard = () => {
@@ -45,6 +45,11 @@ const AdminDashboard = () => {
 
   const verifyMachine = async (id) => {
     await api.put(`/admin/machines/${id}/verify`);
+    loadData();
+  };
+
+  const rejectMachine = async (id) => {
+    await api.put(`/admin/machines/${id}/reject`);
     loadData();
   };
 
@@ -135,12 +140,13 @@ const AdminDashboard = () => {
 
         <section className="card overflow-hidden">
           <h2 className="text-xl font-bold mb-3">{t("machineTable")}</h2>
-          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[1200px] w-full text-sm">
+          <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5"><table className="min-w-[1300px] w-full text-sm">
             <thead>
               <tr className="border-b">
                 <th className="text-left p-2">Machine ID</th>
                 <th className="text-left p-2">Name</th>
                 <th className="text-left p-2">Type</th>
+                <th className="text-left p-2">Image</th>
                 <th className="text-left p-2">Reg. No</th>
                 <th className="text-left p-2">Driver ID</th>
                 <th className="text-left p-2">Driver Name</th>
@@ -158,6 +164,7 @@ const AdminDashboard = () => {
                   <td className="p-2">{machine.machineCode || machine._id}</td>
                   <td className="p-2">{machine.name}</td>
                   <td className="p-2">{machine.type}</td>
+                  <td className="p-2"><img src={getMachineImageUrl(machine.image)} alt={machine.name} className="h-12 w-16 rounded object-cover" /></td>
                   <td className="p-2">{machine.registrationNumber || "-"}</td>
                   <td className="p-2">{machine.driverId || "-"}</td>
                   <td className="p-2">{machine.driverName || "-"}</td>
@@ -165,10 +172,13 @@ const AdminDashboard = () => {
                   <td className="p-2">{machine.driverPhoneNumber || "-"}</td>
                   <td className="p-2">{machine.ownerId?.ownerId || "-"}</td>
                   <td className="p-2">{machine.ownerId?.name || "-"}</td>
-                  <td className="p-2">{machine.verified ? "Verified" : "Pending"}</td>
+                  <td className="p-2">{machine.verificationStatus || (machine.verified ? "Approved" : "Pending")}</td>
                   <td className="p-2">
                     {!machine.verified && (
-                      <button className="btn-primary" onClick={() => verifyMachine(machine._id)}>{t("verifyMachine")}</button>
+                      <div className="flex gap-2">
+                        <button className="btn-primary" onClick={() => verifyMachine(machine._id)}>{t("verifyMachine")}</button>
+                        {machine.verificationStatus !== "Rejected" && <button className="btn-outline" onClick={() => rejectMachine(machine._id)}>Reject</button>}
+                      </div>
                     )}
                   </td>
                 </tr>

@@ -1,6 +1,7 @@
 const Machine = require("../models/Machine");
 const Booking = require("../models/Booking");
 const { generatePrefixedId } = require("../utils/idGenerator");
+const { uploadMachineImage } = require("../config/cloudinary");
 
 const attachCurrentAvailability = async (machine) => {
   const now = new Date();
@@ -49,6 +50,7 @@ const addMachine = async (req, res) => {
     const machineCode = await generatePrefixedId({ key: "machine", prefix: "MA", pad: 3 });
     const driverId = await generatePrefixedId({ key: "driver", prefix: "D", pad: 3 });
 
+    const image = req.file ? await uploadMachineImage(req.file.buffer) : "";
     const machine = await Machine.create({
       machineCode,
       name,
@@ -58,13 +60,14 @@ const addMachine = async (req, res) => {
       location,
       price: Number(price),
       priceUnit: priceUnit || "day",
-      image: req.file ? `/uploads/${req.file.filename}` : "",
+      image,
       ownerId: req.user._id,
       driverId,
       driverName,
       driverLicenseNumber,
       driverPhoneNumber,
       verified: false,
+      verificationStatus: "Pending",
       availability: true,
     });
 
@@ -119,10 +122,11 @@ const updateMachine = async (req, res) => {
     }
 
     const update = { ...req.body };
-    if (req.file) update.image = `/uploads/${req.file.filename}`;
+    if (req.file) update.image = await uploadMachineImage(req.file.buffer);
 
     if (update.price) update.price = Number(update.price);
     update.verified = false;
+    update.verificationStatus = "Pending";
 
     const updatedMachine = await Machine.findByIdAndUpdate(req.params.id, update, { new: true });
     return res.json({ message: "Machine updated and pending re-verification", machine: updatedMachine });

@@ -133,7 +133,7 @@ const getFarmerBookings = async (req, res) => {
   try {
     await markExpiredApprovedAsCompleted();
     const bookings = await Booking.find({ farmerId: req.user._id })
-      .populate("machineId", "machineCode name type registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
+      .populate("machineId", "machineCode name type image registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
       .sort({ createdAt: -1 });
     return res.json(bookings);
   } catch (error) {
@@ -144,7 +144,7 @@ const getFarmerBookings = async (req, res) => {
 const getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
-      .populate("machineId", "machineCode name type registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber price priceUnit location")
+      .populate("machineId", "machineCode name type image registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber price priceUnit location")
       .populate("farmerId", "farmerId name phone location")
       .populate("ownerId", "ownerId name phone location");
 
@@ -170,7 +170,7 @@ const getOwnerBookings = async (req, res) => {
   try {
     await markExpiredApprovedAsCompleted();
     const bookings = await Booking.find({ ownerId: req.user._id })
-      .populate("machineId", "machineCode name type registrationNumber")
+      .populate("machineId", "machineCode name type image registrationNumber")
       .populate("farmerId", "farmerId name phone location")
       .sort({ startDate: 1, createdAt: 1 });
     return res.json(bookings);
@@ -209,7 +209,7 @@ const approveBooking = async (req, res) => {
     await booking.save();
 
     const invoiceBooking = await Booking.findById(booking._id)
-      .populate("machineId", "name type registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
+      .populate("machineId", "name type image registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
       .populate("farmerId", "name phone location")
       .populate("ownerId", "name phone");
 
@@ -336,7 +336,7 @@ const getAllBookings = async (req, res) => {
   try {
     await markExpiredApprovedAsCompleted();
     const bookings = await Booking.find({})
-      .populate("machineId", "machineCode name type location price registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
+      .populate("machineId", "machineCode name type image location price registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
       .populate("farmerId", "farmerId name email phone location")
       .populate("ownerId", "ownerId name email phone location")
       .sort({ createdAt: -1 });
@@ -351,7 +351,7 @@ const downloadInvoice = async (req, res) => {
   try {
     const lang = "en";
     const booking = await Booking.findById(req.params.id)
-      .populate("machineId", "name type registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
+      .populate("machineId", "name type image registrationNumber driverId driverName driverLicenseNumber driverPhoneNumber")
       .populate("farmerId", "name phone location")
       .populate("ownerId", "name phone");
 

@@ -25,6 +25,7 @@ const machineSchema = new mongoose.Schema(
     driverLicenseNumber: { type: String, required: true, trim: true },
     driverPhoneNumber: { type: String, required: true, trim: true },
     verified: { type: Boolean, default: false },
+    verificationStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
     availability: { type: Boolean, default: true },
   },
   { timestamps: true }
