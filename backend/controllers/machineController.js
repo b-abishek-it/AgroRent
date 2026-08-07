@@ -50,7 +50,7 @@ const addMachine = async (req, res) => {
     const machineCode = await generatePrefixedId({ key: "machine", prefix: "MA", pad: 3 });
     const driverId = await generatePrefixedId({ key: "driver", prefix: "D", pad: 3 });
 
-    const image = req.file ? await uploadMachineImage(req.file.buffer) : "";
+    const image = req.file ? await uploadMachineImage(req.file) : "";
     const machine = await Machine.create({
       machineCode,
       name,
@@ -122,7 +122,7 @@ const updateMachine = async (req, res) => {
     }
 
     const update = { ...req.body };
-    if (req.file) update.image = await uploadMachineImage(req.file.buffer);
+    if (req.file) update.image = await uploadMachineImage(req.file);
 
     if (update.price) update.price = Number(update.price);
     update.verified = false;

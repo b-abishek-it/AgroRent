@@ -5,7 +5,9 @@ export const FILE_BASE = import.meta.env.VITE_FILE_BASE_URL || "https://agrorent
 
 export const getMachineImageUrl = (image) => {
   if (!image) return "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600";
-  return image.startsWith("http://") || image.startsWith("https://") ? image : `${FILE_BASE}${image}`;
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  const base = FILE_BASE.replace(/\/$/, "");
+  return image.startsWith("/") ? `${base}${image}` : `${base}/${image}`;
 };
 
 export const api = axios.create({

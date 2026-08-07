@@ -23,23 +23,35 @@ const ensureLocalUploadDir = () => {
   }
 };
 
-const saveMachineImageLocally = (fileBuffer) => {
+const getExtensionFromMime = (mimetype) => {
+  const map = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/webp": "webp",
+    "image/svg+xml": "svg",
+  };
+  return map[mimetype] || "jpg";
+};
+
+const saveMachineImageLocally = (file) => {
   ensureLocalUploadDir();
   const timestamp = Date.now();
-  const fileName = `machine-${timestamp}-${Math.floor(Math.random() * 10000)}.jpg`;
+  const ext = getExtensionFromMime(file.mimetype);
+  const fileName = `machine-${timestamp}-${Math.floor(Math.random() * 10000)}.${ext}`;
   const filePath = path.join(localUploadDir, fileName);
-  fs.writeFileSync(filePath, fileBuffer);
+  fs.writeFileSync(filePath, file.buffer);
   return `/uploads/machines/${fileName}`;
 };
 
-const uploadMachineImage = async (fileBuffer) => {
-  if (!fileBuffer) {
+const uploadMachineImage = async (file) => {
+  if (!file || !file.buffer) {
     throw new Error("No file buffer provided");
   }
 
   if (!cloudinaryConfigured) {
     console.warn("Cloudinary is not configured. Saving machine image locally.");
-    return saveMachineImageLocally(fileBuffer);
+    return saveMachineImageLocally(file);
   }
 
   try {
@@ -55,12 +67,12 @@ const uploadMachineImage = async (fileBuffer) => {
         }
       );
 
-      uploadStream.end(fileBuffer);
+      uploadStream.end(file.buffer);
     });
   } catch (error) {
     console.error("Cloudinary upload failed:", error.message || error);
     console.warn("Falling back to local save for machine image.");
-    return saveMachineImageLocally(fileBuffer);
+    return saveMachineImageLocally(file);
   }
 };
 
