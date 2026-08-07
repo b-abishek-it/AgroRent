@@ -1,15 +1,19 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const fs = require("fs");
 const path = require("path");
 const connectDB = require("./config/db");
 
-// Load .env
+// Load .env from backend directory, or fallback to repo root .env if backend/.env is missing.
+const envPath = fs.existsSync(path.join(__dirname, ".env"))
+  ? path.join(__dirname, ".env")
+  : path.join(__dirname, "..", ".env");
+
 dotenv.config({
-  path: path.join(__dirname, ".env"),
+  path: envPath,
   override: true,
 });
-
 
 const authRoutes = require("./routes/authRoutes");
 const machineRoutes = require("./routes/machineRoutes");
