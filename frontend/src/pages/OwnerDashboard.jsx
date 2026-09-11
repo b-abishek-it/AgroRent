@@ -11,6 +11,8 @@ const OwnerDashboard = () => {
   const [machines, setMachines] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [editId, setEditId] = useState("");
+  const [formError, setFormError] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
     type: machineTypes[0],
@@ -44,32 +46,43 @@ const OwnerDashboard = () => {
 
   const submitMachine = async (e) => {
     e.preventDefault();
-    const payload = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== null && value !== "") payload.append(key, value);
-    });
+    setFormError("");
+    setFormLoading(true);
 
-    if (editId) {
-      await api.put(`/machines/${editId}`, payload);
-    } else {
-      await api.post("/machines", payload);
+    try {
+      const payload = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== null && value !== "") payload.append(key, value);
+      });
+
+      if (editId) {
+        await api.put(`/machines/${editId}`, payload);
+      } else {
+        await api.post("/machines", payload);
+      }
+
+      setForm({
+        name: "",
+        type: machineTypes[0],
+        description: "",
+        registrationNumber: "",
+        location: locations[0],
+        price: "",
+        priceUnit: "day",
+        driverName: "",
+        driverLicenseNumber: "",
+        driverPhoneNumber: "",
+        image: null,
+      });
+      setEditId("");
+      loadData();
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Failed to save machine";
+      setFormError(msg);
+      console.error("submitMachine error:", msg);
+    } finally {
+      setFormLoading(false);
     }
-
-    setForm({
-      name: "",
-      type: machineTypes[0],
-      description: "",
-      registrationNumber: "",
-      location: locations[0],
-      price: "",
-      priceUnit: "day",
-      driverName: "",
-      driverLicenseNumber: "",
-      driverPhoneNumber: "",
-      image: null,
-    });
-    setEditId("");
-    loadData();
   };
 
   const onEdit = (machine) => {
@@ -129,6 +142,11 @@ const OwnerDashboard = () => {
         <section className="card">
           <h2 className="text-xl font-bold mb-3">{t("addMachinery")}</h2>
           <form onSubmit={submitMachine} className="grid gap-3 md:grid-cols-2">
+            {formError && (
+              <div className="md:col-span-2 rounded bg-red-50 border border-red-300 text-red-700 px-4 py-2 text-sm">
+                {formError}
+              </div>
+            )}
             <input className="input" placeholder={t("machineName")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
               {machineTypes.map((type) => <option key={type}>{type}</option>)}
@@ -147,7 +165,7 @@ const OwnerDashboard = () => {
             <input className="input" placeholder={t("driverLicenseNumber")} value={form.driverLicenseNumber} onChange={(e) => setForm({ ...form, driverLicenseNumber: e.target.value })} required />
             <input className="input" placeholder={t("driverPhoneNumber")} value={form.driverPhoneNumber} onChange={(e) => setForm({ ...form, driverPhoneNumber: e.target.value })} required />
             <input className="input" type="file" accept="image/*" onChange={(e) => setForm({ ...form, image: e.target.files[0] })} />
-            <button className="btn-primary w-full md:col-span-2">{editId ? t("updateMachinery") : t("addMachinery")}</button>
+            <button className="btn-primary w-full md:col-span-2" disabled={formLoading}>{formLoading ? "Uploading..." : editId ? t("updateMachinery") : t("addMachinery")}</button>
           </form>
         </section>
 

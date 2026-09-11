@@ -50,7 +50,16 @@ const addMachine = async (req, res) => {
     const machineCode = await generatePrefixedId({ key: "machine", prefix: "MA", pad: 3 });
     const driverId = await generatePrefixedId({ key: "driver", prefix: "D", pad: 3 });
 
-    const image = req.file ? await uploadMachineImage(req.file) : "";
+    let image = "";
+    if (req.file) {
+      try {
+        image = await uploadMachineImage(req.file);
+      } catch (uploadError) {
+        console.error("Image upload failed during addMachine:", uploadError.message);
+        return res.status(500).json({ message: "Image upload failed: " + uploadError.message });
+      }
+    }
+
     const machine = await Machine.create({
       machineCode,
       name,
@@ -122,7 +131,14 @@ const updateMachine = async (req, res) => {
     }
 
     const update = { ...req.body };
-    if (req.file) update.image = await uploadMachineImage(req.file);
+    if (req.file) {
+      try {
+        update.image = await uploadMachineImage(req.file);
+      } catch (uploadError) {
+        console.error("Image upload failed during updateMachine:", uploadError.message);
+        return res.status(500).json({ message: "Image upload failed: " + uploadError.message });
+      }
+    }
 
     if (update.price) update.price = Number(update.price);
     update.verified = false;

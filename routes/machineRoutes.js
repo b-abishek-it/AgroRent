@@ -1,6 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
 const {
   addMachine,
   getVerifiedMachines,
@@ -13,21 +12,34 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, "..", "uploads")),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) return cb(null, true);
+    return cb(new Error("Only image files are allowed"));
   },
 });
 
-const upload = multer({ storage });
+// Middleware to handle multer errors and return clear 400 responses
+const handleMulterError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "Image file is too large. Maximum size is 5 MB." });
+    }
+    return res.status(400).json({ message: `Upload error: ${err.message}` });
+  }
+  if (err && err.message === "Only image files are allowed") {
+    return res.status(400).json({ message: err.message });
+  }
+  next(err);
+};
 
 router.get("/", getVerifiedMachines);
 router.get("/owner/my", protect, authorize("owner"), getOwnerMachines);
 router.get("/:id", getMachineById);
-router.post("/", protect, authorize("owner"), upload.single("image"), addMachine);
-router.put("/:id", protect, authorize("owner"), upload.single("image"), updateMachine);
+router.post("/", protect, authorize("owner"), upload.single("image"), handleMulterError, addMachine);
+router.put("/:id", protect, authorize("owner"), upload.single("image"), handleMulterError, updateMachine);
 router.delete("/:id", protect, authorize("owner"), deleteMachine);
 
 module.exports = router;
