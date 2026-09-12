@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, getMachineImageUrl } from "../api";
+import { api, getMachineImageUrl, locations, machineTypes } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const Icons = {
@@ -115,6 +115,25 @@ const PaginationControls = ({ currentPage, setCurrentPage, itemsPerPage, setItem
   );
 };
 
+const StarRatingDisplay = ({ rating }) => {
+  return (
+    <div className="flex text-yellow-400">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <svg 
+          key={star} 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          fill={star <= rating ? "currentColor" : "none"} 
+          stroke="currentColor" 
+          className="w-4 h-4"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+        </svg>
+      ))}
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -126,8 +145,30 @@ const AdminDashboard = () => {
   const [expandedRowId, setExpandedRowId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  // Filter States
+  const [farmerFilterLocation, setFarmerFilterLocation] = useState("");
+  const [showFarmerFilter, setShowFarmerFilter] = useState(false);
+  const [ownerFilterLocation, setOwnerFilterLocation] = useState("");
+  const [showOwnerFilter, setShowOwnerFilter] = useState(false);
+  const [machineFilterLocation, setMachineFilterLocation] = useState("");
+  const [machineFilterType, setMachineFilterType] = useState("");
+  const [showMachineFilter, setShowMachineFilter] = useState(false);
+
+  // Feedback States
+  const [feedbackSubTab, setFeedbackSubTab] = useState("farmer"); // "farmer" or "owner"
+  const [farmerFeedbackRatingFilter, setFarmerFeedbackRatingFilter] = useState("");
+  const [showFarmerFeedbackFilter, setShowFarmerFeedbackFilter] = useState(false);
+  const [ownerFeedbackRatingFilter, setOwnerFeedbackRatingFilter] = useState("");
+  const [showOwnerFeedbackFilter, setShowOwnerFeedbackFilter] = useState(false);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [farmerFilterLocation, ownerFilterLocation, machineFilterLocation, machineFilterType, farmerFeedbackRatingFilter, ownerFeedbackRatingFilter, feedbackSubTab]);
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const [stats, setStats] = useState({ totalUsers: 0, totalMachines: 0, totalRevenue: 0 });
   const [users, setUsers] = useState([]);
@@ -223,10 +264,43 @@ const AdminDashboard = () => {
   );
 
   const renderFarmers = () => {
-    const data = getPaginatedData(farmers);
+    const filteredFarmers = farmers.filter(f => !farmerFilterLocation || f.location === farmerFilterLocation);
+    const data = getPaginatedData(filteredFarmers);
+    
     return (
       <div className="card flex flex-col h-full border border-slate-100 p-0 overflow-hidden">
-        <div className="p-5 border-b"><h2 className="text-xl font-bold text-slate-800">{t("farmerTable")}</h2></div>
+        <div className="p-5 border-b flex justify-between items-center bg-white">
+          <h2 className="text-xl font-bold text-slate-800">{t("farmerTable")}</h2>
+          <button 
+            onClick={() => setShowFarmerFilter(!showFarmerFilter)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${showFarmerFilter ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+            </svg>
+            Filter
+          </button>
+        </div>
+
+        {showFarmerFilter && (
+          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full max-w-xs">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location</label>
+              <select 
+                value={farmerFilterLocation} 
+                onChange={(e) => setFarmerFilterLocation(e.target.value)}
+                className="input py-2 text-sm bg-white"
+              >
+                <option value="">All Locations</option>
+                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+            </div>
+            {farmerFilterLocation && (
+              <button onClick={() => setFarmerFilterLocation("")} className="mt-5 text-sm text-brand-600 hover:text-brand-700 font-medium px-2">Clear</button>
+            )}
+          </div>
+        )}
+
         <div className="overflow-x-auto flex-1">
           <table className="min-w-[700px] w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-600">
@@ -289,10 +363,43 @@ const AdminDashboard = () => {
   };
 
   const renderOwners = () => {
-    const data = getPaginatedData(owners);
+    const filteredOwners = owners.filter(o => !ownerFilterLocation || o.location === ownerFilterLocation);
+    const data = getPaginatedData(filteredOwners);
+
     return (
       <div className="card flex flex-col h-full border border-slate-100 p-0 overflow-hidden">
-        <div className="p-5 border-b"><h2 className="text-xl font-bold text-slate-800">{t("ownerTable")}</h2></div>
+        <div className="p-5 border-b flex justify-between items-center bg-white">
+          <h2 className="text-xl font-bold text-slate-800">{t("ownerTable")}</h2>
+          <button 
+            onClick={() => setShowOwnerFilter(!showOwnerFilter)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${showOwnerFilter ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+            </svg>
+            Filter
+          </button>
+        </div>
+
+        {showOwnerFilter && (
+          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full max-w-xs">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location</label>
+              <select 
+                value={ownerFilterLocation} 
+                onChange={(e) => setOwnerFilterLocation(e.target.value)}
+                className="input py-2 text-sm bg-white"
+              >
+                <option value="">All Locations</option>
+                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+            </div>
+            {ownerFilterLocation && (
+              <button onClick={() => setOwnerFilterLocation("")} className="mt-5 text-sm text-brand-600 hover:text-brand-700 font-medium px-2">Clear</button>
+            )}
+          </div>
+        )}
+
         <div className="overflow-x-auto flex-1">
           <table className="min-w-[700px] w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-600">
@@ -354,10 +461,66 @@ const AdminDashboard = () => {
   };
 
   const renderMachines = () => {
-    const data = getPaginatedData(machines);
+    const filteredMachines = machines.filter(m => {
+      const matchLocation = !machineFilterLocation || m.location === machineFilterLocation;
+      const matchType = !machineFilterType || m.type === machineFilterType;
+      return matchLocation && matchType;
+    });
+    const data = getPaginatedData(filteredMachines);
+
     return (
       <div className="card flex flex-col h-full border border-slate-100 p-0 overflow-hidden">
-        <div className="p-5 border-b"><h2 className="text-xl font-bold text-slate-800">{t("machineTable")} (with Details)</h2></div>
+        <div className="p-5 border-b flex justify-between items-center bg-white">
+          <h2 className="text-xl font-bold text-slate-800">{t("machineTable")} (with Details)</h2>
+          <button 
+            onClick={() => setShowMachineFilter(!showMachineFilter)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${showMachineFilter ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+            </svg>
+            Filter
+          </button>
+        </div>
+
+        {showMachineFilter && (
+          <div className="p-4 bg-slate-50 border-b flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[150px]">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location</label>
+              <select 
+                value={machineFilterLocation} 
+                onChange={(e) => setMachineFilterLocation(e.target.value)}
+                className="input py-2 text-sm bg-white"
+              >
+                <option value="">All Locations</option>
+                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[150px]">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Machine Type</label>
+              <select 
+                value={machineFilterType} 
+                onChange={(e) => setMachineFilterType(e.target.value)}
+                className="input py-2 text-sm bg-white"
+              >
+                <option value="">All Types</option>
+                {machineTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+            {(machineFilterLocation || machineFilterType) && (
+              <button 
+                onClick={() => {
+                  setMachineFilterLocation("");
+                  setMachineFilterType("");
+                }} 
+                className="mt-5 text-sm text-brand-600 hover:text-brand-700 font-medium px-2"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="overflow-x-auto flex-1">
           <table className="min-w-[1000px] w-full text-sm text-left border-collapse">
             <thead className="bg-slate-50 text-slate-600">
@@ -399,8 +562,20 @@ const AdminDashboard = () => {
                       <td className="p-3" onClick={e => e.stopPropagation()}>
                         {!machine.verified && (
                           <div className="flex gap-2">
-                            <button className="text-brand-600 font-medium hover:underline" onClick={() => verifyMachine(machine._id)}>{t("verifyMachine")}</button>
-                            {machine.verificationStatus !== "Rejected" && <button className="text-red-600 font-medium hover:underline" onClick={() => rejectMachine(machine._id)}>Reject</button>}
+                            <button 
+                              className="px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded-md text-sm font-semibold transition-colors shadow-sm" 
+                              onClick={() => verifyMachine(machine._id)}
+                            >
+                              Approve
+                            </button>
+                            {machine.verificationStatus !== "Rejected" && (
+                              <button 
+                                className="px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-md text-sm font-semibold transition-colors shadow-sm" 
+                                onClick={() => rejectMachine(machine._id)}
+                              >
+                                Reject
+                              </button>
+                            )}
                           </div>
                         )}
                       </td>
@@ -408,13 +583,18 @@ const AdminDashboard = () => {
                     {isExpanded && (
                       <tr className="bg-slate-50/50 border-b border-slate-200">
                         <td colSpan="8" className="p-0">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 animate-in slide-in-from-top-2 duration-200">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 animate-in slide-in-from-top-2 duration-200">
                             {/* Machine Details */}
-                            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                              <h4 className="font-bold text-brand-700 mb-3 flex items-center gap-2">🚜 Machine Details</h4>
+                            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                              <h4 className="font-bold text-black mb-4 flex items-center gap-2">Machine Details</h4>
                               <div className="flex gap-4">
-                                <img src={getMachineImageUrl(machine.image)} alt={machine.name} className="h-24 w-24 rounded-lg object-cover border" />
-                                <div className="space-y-1 text-sm">
+                                <img 
+                                  src={getMachineImageUrl(machine.image)} 
+                                  alt={machine.name} 
+                                  className="h-28 w-28 rounded-lg object-cover border cursor-pointer hover:opacity-90 transition-opacity shadow-sm" 
+                                  onClick={() => setSelectedImage(getMachineImageUrl(machine.image))}
+                                />
+                                <div className="space-y-2 text-base">
                                   <p><span className="text-slate-500">Reg No:</span> <span className="font-medium">{machine.registrationNumber || "-"}</span></p>
                                   <p><span className="text-slate-500">Price:</span> <span className="font-medium">INR {machine.price} / {machine.priceUnit}</span></p>
                                   <p><span className="text-slate-500">Location:</span> <span className="font-medium">{machine.location}</span></p>
@@ -423,9 +603,9 @@ const AdminDashboard = () => {
                             </div>
                             
                             {/* Owner Details */}
-                            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                              <h4 className="font-bold text-indigo-700 mb-3 flex items-center gap-2">👤 Owner Details</h4>
-                              <div className="space-y-2 text-sm">
+                            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                              <h4 className="font-bold text-black mb-4 flex items-center gap-2">Owner Details</h4>
+                              <div className="space-y-2 text-base">
                                 <p><span className="text-slate-500">ID:</span> <span className="font-medium">{machine.ownerId?.ownerId || "-"}</span></p>
                                 <p><span className="text-slate-500">Name:</span> <span className="font-medium">{machine.ownerId?.name || "-"}</span></p>
                                 <p><span className="text-slate-500">Phone:</span> <span className="font-medium">{machine.ownerId?.phone || "-"}</span></p>
@@ -434,9 +614,9 @@ const AdminDashboard = () => {
                             </div>
 
                             {/* Driver Details */}
-                            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                              <h4 className="font-bold text-amber-600 mb-3 flex items-center gap-2">👷 Driver Details</h4>
-                              <div className="space-y-2 text-sm">
+                            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                              <h4 className="font-bold text-black mb-4 flex items-center gap-2">Driver Details</h4>
+                              <div className="space-y-2 text-base">
                                 <p><span className="text-slate-500">ID:</span> <span className="font-medium">{machine.driverId || "-"}</span></p>
                                 <p><span className="text-slate-500">Name:</span> <span className="font-medium">{machine.driverName || "-"}</span></p>
                                 <p><span className="text-slate-500">Phone:</span> <span className="font-medium">{machine.driverPhoneNumber || "-"}</span></p>
@@ -512,18 +692,94 @@ const AdminDashboard = () => {
   };
 
   const renderFeedbacks = () => {
-    const data = getPaginatedData(feedbacks);
+    const isFarmer = feedbackSubTab === "farmer";
+    
+    // Filter feedbacks based on role and rating
+    const activeFeedbacks = feedbacks.filter(f => {
+      const roleMatch = f.submittedByRole === (isFarmer ? "farmer" : "owner");
+      if (!roleMatch) return false;
+      const activeRatingFilter = isFarmer ? farmerFeedbackRatingFilter : ownerFeedbackRatingFilter;
+      if (activeRatingFilter && f.rating?.toString() !== activeRatingFilter) return false;
+      return true;
+    });
+    
+    const data = getPaginatedData(activeFeedbacks);
+    const showFilter = isFarmer ? showFarmerFeedbackFilter : showOwnerFeedbackFilter;
+    const setShowFilter = isFarmer ? setShowFarmerFeedbackFilter : setShowOwnerFeedbackFilter;
+    const ratingFilter = isFarmer ? farmerFeedbackRatingFilter : ownerFeedbackRatingFilter;
+    const setRatingFilter = isFarmer ? setFarmerFeedbackRatingFilter : setOwnerFeedbackRatingFilter;
+
     return (
       <div className="card flex flex-col h-full border border-slate-100 p-0 overflow-hidden">
-        <div className="p-5 border-b"><h2 className="text-xl font-bold text-slate-800">{t("feedbackTable")}</h2></div>
+        {/* Header & Filter Toggle */}
+        <div className="p-5 border-b flex flex-wrap justify-between items-center bg-white gap-4">
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button 
+              onClick={() => setFeedbackSubTab("farmer")}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${isFarmer ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Farmer Feedbacks
+            </button>
+            <button 
+              onClick={() => setFeedbackSubTab("owner")}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${!isFarmer ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Machinery Owner Feedbacks
+            </button>
+          </div>
+          <button 
+            onClick={() => setShowFilter(!showFilter)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${showFilter ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+            </svg>
+            Filter
+          </button>
+        </div>
+
+        {/* Filter Bar */}
+        {showFilter && (
+          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full max-w-xs">
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filter by Rating</label>
+              <select 
+                value={ratingFilter} 
+                onChange={(e) => setRatingFilter(e.target.value)}
+                className="input py-2 text-sm bg-white"
+              >
+                <option value="">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+            </div>
+            {ratingFilter && (
+              <button onClick={() => setRatingFilter("")} className="mt-5 text-sm text-brand-600 hover:text-brand-700 font-medium px-2">Clear</button>
+            )}
+          </div>
+        )}
+
         <div className="overflow-x-auto flex-1">
-          <table className="min-w-[650px] w-full text-sm text-left">
+          <table className="min-w-[800px] w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="p-3 font-semibold">Feedback ID</th>
                 <th className="p-3 font-semibold">Booking ID</th>
-                <th className="p-3 font-semibold">Farmer ID</th>
-                <th className="p-3 font-semibold">Farmer Name</th>
+                {isFarmer ? (
+                  <>
+                    <th className="p-3 font-semibold">Farmer ID</th>
+                    <th className="p-3 font-semibold">Farmer Name</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="p-3 font-semibold">Owner ID</th>
+                    <th className="p-3 font-semibold">Owner Name</th>
+                  </>
+                )}
+                <th className="p-3 font-semibold">Rating</th>
                 <th className="p-3 font-semibold">Description</th>
               </tr>
             </thead>
@@ -532,16 +788,34 @@ const AdminDashboard = () => {
                 <tr key={feedback._id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="p-3 text-slate-600 font-medium">{feedback.feedbackCode || feedback._id}</td>
                   <td className="p-3 text-slate-600">{feedback.bookingId?.bookingCode || feedback.bookingId || "-"}</td>
-                  <td className="p-3 text-slate-600">{feedback.farmerId?.farmerId || "-"}</td>
-                  <td className="p-3 text-slate-800 font-medium">{feedback.farmerId?.name || "-"}</td>
-                  <td className="p-3 text-slate-600 max-w-sm truncate" title={feedback.description}>{feedback.description}</td>
+                  {isFarmer ? (
+                    <>
+                      <td className="p-3 text-slate-600">{feedback.farmerId?.farmerId || "-"}</td>
+                      <td className="p-3 text-slate-800 font-medium">{feedback.farmerId?.name || "-"}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="p-3 text-slate-600">{feedback.ownerId?.ownerId || "-"}</td>
+                      <td className="p-3 text-slate-800 font-medium">{feedback.ownerId?.name || "-"}</td>
+                    </>
+                  )}
+                  <td className="p-3">
+                    <StarRatingDisplay rating={feedback.rating || 0} />
+                  </td>
+                  <td className="p-3 text-slate-600 max-w-sm truncate" title={feedback.description}>{feedback.description || "-"}</td>
                 </tr>
               ))}
-              {data.length === 0 && <tr><td colSpan="5" className="p-4 text-center text-slate-500">No feedbacks found.</td></tr>}
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="p-4 text-center text-slate-500">
+                    No {isFarmer ? "farmer" : "machinery owner"} feedbacks found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        <PaginationControls currentPage={currentPage} setCurrentPage={setCurrentPage} itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} totalItems={feedbacks.length} />
+        <PaginationControls currentPage={currentPage} setCurrentPage={setCurrentPage} itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} totalItems={activeFeedbacks.length} />
       </div>
     );
   };
@@ -658,6 +932,31 @@ const AdminDashboard = () => {
                 Delete User
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md cursor-pointer"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl w-full flex justify-center items-center">
+            <button 
+              className="absolute -top-12 right-0 md:-right-12 text-white hover:text-slate-200 transition-colors bg-slate-800/80 p-2 rounded-full cursor-pointer hover:bg-slate-700"
+              onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+              title="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Machine full size" 
+              className="max-h-[85vh] max-w-full object-contain rounded-xl shadow-2xl cursor-default border-4 border-white/10" 
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}

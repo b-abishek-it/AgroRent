@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BookingCard from "../components/BookingCard";
+import StarRating from "../components/StarRating";
 import { api } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -9,7 +10,7 @@ const FarmerDashboard = () => {
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem("user") || "null");
   const [bookings, setBookings] = useState([]);
-  const [feedback, setFeedback] = useState({ bookingId: "", description: "" });
+  const [feedback, setFeedback] = useState({ bookingId: "", rating: 5, description: "" });
   const [message, setMessage] = useState("");
   const { t, lang } = useLanguage();
 
@@ -63,8 +64,8 @@ const FarmerDashboard = () => {
     e.preventDefault();
     try {
       await api.post("/feedback", feedback);
-      setMessage("Feedback submitted");
-      setFeedback({ bookingId: "", description: "" });
+      setMessage("Feedback submitted successfully!");
+      setFeedback({ bookingId: "", rating: 5, description: "" });
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to submit feedback");
     }
@@ -114,7 +115,7 @@ const FarmerDashboard = () => {
 
         <div className="card mt-8 w-full max-w-xl">
           <h3 className="text-lg font-semibold mb-2">{t("submitFeedback")}</h3>
-          <form onSubmit={submitFeedback} className="space-y-2">
+          <form onSubmit={submitFeedback} className="space-y-4">
             <input
               className="input"
               placeholder={t("bookingId")}
@@ -122,6 +123,15 @@ const FarmerDashboard = () => {
               onChange={(e) => setFeedback({ ...feedback, bookingId: e.target.value })}
               required
             />
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-slate-700">Rating</label>
+              <StarRating 
+                rating={feedback.rating} 
+                onRatingChange={(newRating) => setFeedback({ ...feedback, rating: newRating })} 
+              />
+            </div>
+
             <textarea
               className="input"
               placeholder={t("feedbackDescription")}

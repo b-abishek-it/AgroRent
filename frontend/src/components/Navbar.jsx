@@ -19,8 +19,14 @@ const Navbar = () => {
 
   const navLinks = (
     <>
-      <Link to="/" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 transition-colors">{t("navHome")}</Link>
-      <Link to="/search" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 transition-colors">{t("navSearch")}</Link>
+      <Link to="/" onClick={closeMenu} className="flex items-center gap-2 p-2 md:px-2 md:py-1.5 text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors" title={t("navHome")}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span className="md:hidden font-medium">{t("navHome")}</span>
+      </Link>
+      <Link to="/search" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center">{t("navSearch")}</Link>
     </>
   );
 
@@ -40,15 +46,15 @@ const Navbar = () => {
 
       {!user ? (
         <>
-          <Link to="/login" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 px-2 transition-colors">{t("navLogin")}</Link>
-          <Link to="/register" onClick={closeMenu} className="btn-primary py-1.5 shadow-sm">{t("navRegister")}</Link>
+          <Link to="/login" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors text-sm">{t("navLogin")}</Link>
+          <Link to="/register" onClick={closeMenu} className="btn-primary shadow-sm py-1.5 px-4 text-sm">{t("navRegister")}</Link>
         </>
       ) : (
         <>
-          <Link to={user.role === "farmer" ? "/farmer" : user.role === "owner" ? "/owner" : "/admin"} onClick={closeMenu} className="btn-outline py-1.5 bg-white">
+          <Link to={user.role === "farmer" ? "/farmer" : user.role === "owner" ? "/owner" : "/admin"} onClick={closeMenu} className="btn-outline bg-white py-1.5 px-4 text-sm">
             {t("navDashboard")}
           </Link>
-          <button onClick={onLogout} className="btn-primary py-1.5 shadow-sm !bg-red-600 hover:!bg-red-700 border-none">{t("navLogout")}</button>
+          <button onClick={onLogout} className="btn-primary shadow-sm !bg-red-600 hover:!bg-red-700 border-none py-1.5 px-4 text-sm">{t("navLogout")}</button>
         </>
       )}
     </>
@@ -57,14 +63,21 @@ const Navbar = () => {
   return (
     <nav className="relative z-20 border-b bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        {/* Left side: Logo & Nav Links */}
-        <div className="flex items-center gap-8">
+        {/* Left side: Logo */}
+        <div className="flex items-center">
           <Link to="/" onClick={closeMenu} className="text-xl font-bold text-brand-700 sm:text-2xl tracking-tight">AgroRent</Link>
-          <div className="hidden md:flex items-center gap-6">{navLinks}</div>
         </div>
 
-        {/* Right side: Actions */}
-        <div className="hidden md:flex items-center gap-4">{actionButtons}</div>
+        {/* Center: Spacer */}
+        <div className="hidden md:flex flex-1">
+        </div>
+
+        {/* Right side: Nav Links & Actions */}
+        <div className="hidden md:flex items-center gap-3">
+          {navLinks}
+          <div className="w-px h-5 bg-slate-200 mx-1"></div>
+          {actionButtons}
+        </div>
 
         {/* Mobile menu button */}
         <button type="button" className="inline-flex rounded-lg p-2 text-slate-700 hover:bg-slate-100 md:hidden" aria-label="Toggle navigation" aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen((open) => !open)}>

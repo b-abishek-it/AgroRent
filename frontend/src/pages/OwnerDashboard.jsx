@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, locations, machineTypes, getMachineImageUrl } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
+import StarRating from "../components/StarRating";
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const OwnerDashboard = () => {
 
   const [machines, setMachines] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [feedback, setFeedback] = useState({ bookingId: "", rating: 5, description: "" });
+  const [feedbackMessage, setFeedbackMessage] = useState("");
   const [editId, setEditId] = useState("");
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
@@ -136,6 +139,17 @@ const OwnerDashboard = () => {
     link.remove();
   };
 
+  const submitFeedback = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/feedback", feedback);
+      setFeedbackMessage("Feedback submitted successfully!");
+      setFeedback({ bookingId: "", rating: 5, description: "" });
+    } catch (error) {
+      setFeedbackMessage(error.response?.data?.message || "Failed to submit feedback");
+    }
+  };
+
   return (
       <div className="mx-auto max-w-6xl space-y-8 p-4 sm:py-6">
         <p className="text-slate-600">Owner ID: {user?.ownerId || "N/A"}</p>
@@ -164,7 +178,17 @@ const OwnerDashboard = () => {
             <input className="input" placeholder={t("driverName")} value={form.driverName} onChange={(e) => setForm({ ...form, driverName: e.target.value })} required />
             <input className="input" placeholder={t("driverLicenseNumber")} value={form.driverLicenseNumber} onChange={(e) => setForm({ ...form, driverLicenseNumber: e.target.value })} required />
             <input className="input" placeholder={t("driverPhoneNumber")} value={form.driverPhoneNumber} onChange={(e) => setForm({ ...form, driverPhoneNumber: e.target.value })} required />
-            <input className="input" type="file" accept="image/*" onChange={(e) => setForm({ ...form, image: e.target.files[0] })} />
+            <input className="input" type="file" accept="image/*" onChange={(e) => {
+              const file = e.target.files[0];
+              if (file && file.size > 2 * 1024 * 1024) {
+                setFormError("Image file is too large. Maximum size is 2 MB.");
+                e.target.value = null;
+                setForm({ ...form, image: null });
+              } else {
+                setFormError("");
+                setForm({ ...form, image: file });
+              }
+            }} />
             <button className="btn-primary w-full md:col-span-2" disabled={formLoading}>{formLoading ? "Uploading..." : editId ? t("updateMachinery") : t("addMachinery")}</button>
           </form>
         </section>
@@ -217,6 +241,37 @@ const OwnerDashboard = () => {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="card mt-8 w-full max-w-xl mx-auto md:mx-0">
+          <h3 className="text-lg font-semibold mb-2">{t("submitFeedback")}</h3>
+          <form onSubmit={submitFeedback} className="space-y-4">
+            <input
+              className="input"
+              placeholder={t("bookingId")}
+              value={feedback.bookingId}
+              onChange={(e) => setFeedback({ ...feedback, bookingId: e.target.value })}
+              required
+            />
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-slate-700">Rating</label>
+              <StarRating 
+                rating={feedback.rating} 
+                onRatingChange={(newRating) => setFeedback({ ...feedback, rating: newRating })} 
+              />
+            </div>
+
+            <textarea
+              className="input"
+              placeholder={t("feedbackDescription")}
+              value={feedback.description}
+              onChange={(e) => setFeedback({ ...feedback, description: e.target.value })}
+              required
+            />
+            <button className="btn-primary w-full sm:w-auto">{t("submit")}</button>
+          </form>
+          {feedbackMessage && <p className="mt-2 text-sm text-brand-700">{feedbackMessage}</p>}
         </section>
       </div>
   );

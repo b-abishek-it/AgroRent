@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const PasswordReset = require("../models/PasswordReset");
 const { generatePrefixedId } = require("../utils/idGenerator");
-const { sendWelcomeEmail, sendPasswordResetOtpEmail } = require("../services/mailjet.service");
+const { sendWelcomeEmail, sendPasswordResetOtpEmail } = require("../src/services/mailjet.service");
 
 const generateToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -78,7 +78,7 @@ const login = async (req, res) => {
     }
 
     if (role === "admin") {
-      if (phone === "admin" && password === "1234") {
+      if (phone === "admin" && password === "0604") {
         const token = generateToken({ id: "admin", role: "admin" });
         return res.json({
           token,

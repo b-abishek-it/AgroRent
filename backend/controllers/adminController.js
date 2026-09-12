@@ -69,7 +69,7 @@ const getMachinesForVerification = async (req, res) => {
 const getAllMachines = async (req, res) => {
   try {
     const machines = await Machine.find({})
-      .populate("ownerId", "ownerId name phone location")
+      .populate("ownerId", "ownerId name email phone location")
       .sort({ createdAt: -1 });
     return res.json(machines);
   } catch (error) {
