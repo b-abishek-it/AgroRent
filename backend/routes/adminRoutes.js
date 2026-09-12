@@ -2,7 +2,8 @@ const express = require("express");
 const {
   getDashboardStats,
   getUsers,
-  blockUser,
+  toggleBlockUser,
+  deleteUser,
   getMachinesForVerification,
   getAllMachines,
   verifyMachine,
@@ -16,7 +17,8 @@ router.use(protect, authorize("admin"));
 
 router.get("/stats", getDashboardStats);
 router.get("/users", getUsers);
-router.put("/users/:id/block", blockUser);
+router.put("/users/:id/toggle-block", toggleBlockUser);
+router.put("/users/:id/delete", deleteUser);
 router.get("/machines/pending", getMachinesForVerification);
 router.get("/machines/all", getAllMachines);
 router.put("/machines/:id/verify", verifyMachine);

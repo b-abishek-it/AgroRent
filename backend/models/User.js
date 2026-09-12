@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["farmer", "owner"], required: true },
     password: { type: String, required: true },
     isBlocked: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
     resetCode: { type: String, default: null },
     resetCodeExpires: { type: Date, default: null },
   },

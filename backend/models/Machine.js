@@ -27,6 +27,7 @@ const machineSchema = new mongoose.Schema(
     verified: { type: Boolean, default: false },
     verificationStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
     availability: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

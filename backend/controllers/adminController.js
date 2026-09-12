@@ -18,36 +18,40 @@ const getDashboardStats = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({}, "farmerId ownerId name email phone location role isBlocked").sort({ createdAt: -1 });
+    const users = await User.find({}, "farmerId ownerId name email phone location role isBlocked isDeleted").sort({ createdAt: -1 });
     return res.json(users);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
-const blockUser = async (req, res) => {
+const toggleBlockUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+
+    return res.json({ message: `User account has been ${user.isBlocked ? 'deactivated' : 'activated'}` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.isDeleted = true;
+    await user.save();
+
     if (user.role === "owner") {
-      const ownerMachines = await Machine.find({ ownerId: user._id }, "_id");
-      const ownerMachineIds = ownerMachines.map((machine) => machine._id);
-
-      await Booking.deleteMany({
-        $or: [{ ownerId: user._id }, { machineId: { $in: ownerMachineIds } }],
-      });
-      await Machine.deleteMany({ ownerId: user._id });
+      await Machine.updateMany({ ownerId: user._id }, { isDeleted: true });
     }
 
-    if (user.role === "farmer") {
-      await Feedback.deleteMany({ farmerId: user._id });
-      await Booking.deleteMany({ farmerId: user._id });
-    }
-
-    await User.deleteOne({ _id: user._id });
-
-    return res.json({ message: "User removed permanently" });
+    return res.json({ message: "User permanently removed from platform" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -106,7 +110,8 @@ const rejectMachine = async (req, res) => {
 module.exports = {
   getDashboardStats,
   getUsers,
-  blockUser,
+  toggleBlockUser,
+  deleteUser,
   getMachinesForVerification,
   getAllMachines,
   verifyMachine,

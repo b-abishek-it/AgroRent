@@ -1,18 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import MachineCard from "../components/MachineCard";
-import { api } from "../api";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const Home = () => {
   const { t } = useLanguage();
-  const [machines, setMachines] = useState([]);
-
-  useEffect(() => {
-    api.get("/machines")
-      .then(({ data }) => setMachines(data.slice(0, 3)))
-      .catch(() => setMachines([]));
-  }, []);
 
   return (
     <>
@@ -37,17 +27,6 @@ const Home = () => {
           />
         </div>
       </section>
-      {machines.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold text-slate-800">{t("searchMachinery")}</h2>
-            <Link to="/search" className="text-sm font-medium text-brand-700 hover:text-brand-800">{t("viewDetails")}</Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {machines.map((machine) => <MachineCard key={machine._id} machine={machine} />)}
-          </div>
-        </section>
-      )}
     </>
   );
 };

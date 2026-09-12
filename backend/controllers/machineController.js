@@ -89,7 +89,7 @@ const addMachine = async (req, res) => {
 const getVerifiedMachines = async (req, res) => {
   try {
     const { type, location } = req.query;
-    const query = { verified: true };
+    const query = { verified: true, isDeleted: { $ne: true } };
 
     if (type) query.type = type;
     if (location) query.location = location;
