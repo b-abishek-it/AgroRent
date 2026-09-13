@@ -37,12 +37,14 @@ const sendWelcomeEmail = async (userEmail, userName, userRole) => {
       Subject: "Welcome to AgroRent 🌱",
     };
 
+    const displayRole = userRole === "owner" ? "Machinery Owner" : (userRole === "farmer" ? "Farmer" : userRole);
+
     if (templateId && templateId !== "your_welcome_template_id_here") {
       messageConfig.TemplateID = parseInt(templateId, 10);
       messageConfig.TemplateLanguage = true;
       messageConfig.Variables = {
         userName: userName,
-        userRole: userRole,
+        userRole: displayRole,
       };
     } else {
       // Fallback to HTMLPart if no template ID is configured
@@ -50,7 +52,7 @@ const sendWelcomeEmail = async (userEmail, userName, userRole) => {
         <h3>Hello ${userName},</h3>
         <p>Welcome to AgroRent!</p>
         <p>Your account has been successfully created.</p>
-        <p><strong>Role:</strong> ${userRole}</p>
+        <p><strong>Role:</strong> ${displayRole}</p>
         <p>You can now log in to AgroRent and start using the platform.</p>
         <br />
         <p>Thank you,</p>
@@ -129,7 +131,65 @@ const sendPasswordResetOtpEmail = async (userEmail, userName, otp, expiryMinutes
   }
 };
 
+const sendRegistrationOtpEmail = async (userEmail, userName, otp, expiryMinutes) => {
+  try {
+    const mailjet = getMailjetClient();
+    const fromEmail = process.env.MAILJET_FROM_EMAIL || "itabishek7@gmail.com";
+    const fromName = process.env.MAILJET_FROM_NAME || "AgroRent";
+    const templateId = process.env.MAILJET_REGISTRATION_OTP_TEMPLATE_ID;
+
+    const messageConfig = {
+      From: {
+        Email: fromEmail,
+        Name: fromName,
+      },
+      To: [
+        {
+          Email: userEmail,
+          Name: userName || "User",
+        },
+      ],
+      Subject: "Verify Your Email - AgroRent",
+    };
+
+    if (templateId && templateId !== "your_registration_otp_template_id_here") {
+      messageConfig.TemplateID = parseInt(templateId, 10);
+      messageConfig.TemplateLanguage = true;
+      messageConfig.Variables = {
+        userName: userName || "User",
+        otp: otp,
+        expiryMinutes: expiryMinutes,
+      };
+    } else {
+      // Fallback to HTMLPart
+      messageConfig.HTMLPart = `
+        <h3>Hello ${userName || "User"},</h3>
+        <p>Thank you for registering with AgroRent.</p>
+        <p>Your email verification OTP is:</p>
+        <h2>${otp}</h2>
+        <p>This OTP will expire in ${expiryMinutes} minutes.</p>
+        <p>Do not share this OTP with anyone.</p>
+        <br />
+        <p>Regards,</p>
+        <p>AgroRent Team</p>
+      `;
+    }
+
+    const request = mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [messageConfig],
+    });
+
+    const result = await request;
+    console.log(`Registration OTP email sent to ${userEmail}. Status: ${result.response.status}`);
+    return result;
+  } catch (error) {
+    console.error(`Mailjet Registration OTP Email Error for ${userEmail}:`, error.statusCode, error.message);
+    throw new Error("Failed to send Registration OTP email");
+  }
+};
+
 module.exports = {
   sendWelcomeEmail,
   sendPasswordResetOtpEmail,
+  sendRegistrationOtpEmail,
 };

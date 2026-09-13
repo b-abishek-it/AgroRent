@@ -3,8 +3,9 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
 const PasswordReset = require("../models/PasswordReset");
+const PendingRegistration = require("../models/PendingRegistration");
 const { generatePrefixedId } = require("../utils/idGenerator");
-const { sendWelcomeEmail, sendPasswordResetOtpEmail } = require("../src/services/mailjet.service");
+const { sendWelcomeEmail, sendPasswordResetOtpEmail, sendRegistrationOtpEmail } = require("../src/services/mailjet.service");
 
 const generateToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -29,29 +30,105 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Email or phone already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Generate secure 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    const userIdField = role === "farmer" ? "farmerId" : "ownerId";
+    // Store in PendingRegistration
+    let pending = await PendingRegistration.findOne({ email });
+    if (pending) {
+      pending.name = name;
+      pending.phone = phone;
+      pending.location = location;
+      pending.role = role;
+      pending.passwordHash = passwordHash;
+      pending.otpHash = otpHash;
+      pending.expiresAt = expiresAt;
+      pending.attempts = 0;
+      pending.lastSentAt = Date.now();
+      await pending.save();
+    } else {
+      await PendingRegistration.create({
+        name,
+        email,
+        phone,
+        location,
+        role,
+        passwordHash,
+        otpHash,
+        expiresAt,
+      });
+    }
+
+    // Send OTP Email
+    await sendRegistrationOtpEmail(email, name, otp, 5);
+
+    return res.status(200).json({
+      success: true,
+      requiresOtpVerification: true,
+      message: "Verification OTP sent to your email.",
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const verifyRegistrationOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+
+    const pending = await PendingRegistration.findOne({ email });
+    if (!pending) {
+      return res.status(400).json({ message: "No pending registration found for this email. Please register again." });
+    }
+
+    if (pending.expiresAt < new Date()) {
+      return res.status(400).json({ message: "Your OTP has expired. Please request a new OTP." });
+    }
+
+    if (pending.attempts >= 5) {
+      return res.status(429).json({ message: "Too many incorrect attempts. Please request a new OTP." });
+    }
+
+    const isMatch = await bcrypt.compare(otp, pending.otpHash);
+    if (!isMatch) {
+      pending.attempts += 1;
+      await pending.save();
+      return res.status(400).json({ message: "Invalid OTP. Please check the code and try again." });
+    }
+
+    // OTP verified successfully, create User
+    const userIdField = pending.role === "farmer" ? "farmerId" : "ownerId";
     const generatedId = await generatePrefixedId({
-      key: role === "farmer" ? "farmer" : "owner",
-      prefix: role === "farmer" ? "F" : "M",
+      key: pending.role === "farmer" ? "farmer" : "owner",
+      prefix: pending.role === "farmer" ? "F" : "M",
       pad: 3,
     });
 
     const user = await User.create({
       [userIdField]: generatedId,
-      name,
-      email,
-      phone,
-      location,
-      role,
-      password: hashedPassword,
+      name: pending.name,
+      email: pending.email,
+      phone: pending.phone,
+      location: pending.location,
+      role: pending.role,
+      password: pending.passwordHash,
     });
+
+    // Delete pending registration after successful creation
+    await PendingRegistration.deleteOne({ email });
 
     // Send Welcome Email
     sendWelcomeEmail(user.email, user.name, user.role);
 
     return res.status(201).json({
+      success: true,
       message: "Registered successfully",
       user: {
         _id: user._id,
@@ -64,6 +141,42 @@ const register = async (req, res) => {
         location: user.location,
       },
     });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const resendRegistrationOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const pending = await PendingRegistration.findOne({ email });
+    if (!pending) {
+      return res.status(400).json({ message: "No pending registration found." });
+    }
+
+    // Check 60 seconds cooldown
+    if (Date.now() - pending.lastSentAt.getTime() < 60000) {
+      return res.status(429).json({ message: "Please wait 60 seconds before requesting another OTP." });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    pending.otpHash = otpHash;
+    pending.expiresAt = expiresAt;
+    pending.attempts = 0;
+    pending.lastSentAt = Date.now();
+    await pending.save();
+
+    await sendRegistrationOtpEmail(pending.email, pending.name, otp, 5);
+
+    return res.json({ success: true, message: "A new OTP has been sent to your email." });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -258,6 +371,8 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
   register,
+  verifyRegistrationOtp,
+  resendRegistrationOtp,
   login,
   forgotPassword,
   verifyOtp,
