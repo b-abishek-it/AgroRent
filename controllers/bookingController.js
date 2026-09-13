@@ -372,7 +372,7 @@ const downloadInvoice = async (req, res) => {
     }
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=invoice-${booking._id}.pdf`);
+    res.setHeader("Content-Disposition", `attachment; filename=${booking.bookingCode || booking._id}.pdf`);
 
     if (booking.invoiceFilePath && booking.invoiceLanguage === "en" && fs.existsSync(booking.invoiceFilePath)) {
       return res.sendFile(booking.invoiceFilePath);

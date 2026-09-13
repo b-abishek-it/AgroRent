@@ -119,13 +119,11 @@ const MachineDetails = () => {
           <h2 className="text-2xl font-bold">{machine.name}</h2>
           <p className="text-slate-600">{machine.type}</p>
           <p className="mt-2">{machine.description}</p>
-          <p className="mt-2">{t("location")}: {machine.location}</p>
-          <p className="font-semibold mt-1">{t("price")}: INR {machine.price} / {machine.priceUnit}</p>
-          <p className="mt-1">{t("machineRegistrationNumber")}: {machine.registrationNumber}</p>
-          <p className="mt-1">{t("driverId")}: {machine.driverId}</p>
-          <p className="mt-1">{t("driverName")}: {machine.driverName}</p>
-          <p className="mt-1">{t("driverLicenseNumber")}: {machine.driverLicenseNumber}</p>
-          <p className="mt-1">{t("driverPhoneNumber")}: {machine.driverPhoneNumber}</p>
+          <p className="mt-2"><span className="font-medium">{t("location")}:</span> {machine.location}</p>
+          <p className="mt-1"><span className="font-medium">{t("price")}:</span> INR {machine.price} / {machine.priceUnit}</p>
+          <p className="mt-1"><span className="font-medium">{t("machineRegistrationNumber")}:</span> {machine.registrationNumber}</p>
+          <p className="mt-1"><span className="font-medium">Owner Name:</span> {machine.ownerId?.name || "N/A"}</p>
+          <p className="mt-1"><span className="font-medium">{t("driverName")}:</span> {machine.driverName || "N/A"}</p>
 
           <div className="mt-4 space-y-2">
             <input

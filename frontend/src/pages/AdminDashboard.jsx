@@ -79,7 +79,7 @@ const SidebarItem = ({ label, id, activeTab, setActiveTab, icon: Icon, isSidebar
 const PaginationControls = ({ currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, totalItems }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-t bg-slate-50 rounded-b-xl mt-auto">
+    <div className="flex flex-wrap items-center justify-center sm:justify-between gap-4 p-4 border-t bg-slate-50 rounded-b-xl mt-auto">
       <div className="flex items-center gap-2">
         <span className="text-sm text-slate-600">Rows per page:</span>
         <select 
@@ -283,13 +283,13 @@ const AdminDashboard = () => {
         </div>
 
         {showFarmerFilter && (
-          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex flex-col gap-1 w-full max-w-xs">
+          <div className="p-4 bg-slate-50 border-b flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location</label>
               <select 
                 value={farmerFilterLocation} 
                 onChange={(e) => setFarmerFilterLocation(e.target.value)}
-                className="input py-2 text-sm bg-white"
+                className="input py-2 text-sm bg-white w-full"
               >
                 <option value="">All Locations</option>
                 {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
@@ -382,13 +382,13 @@ const AdminDashboard = () => {
         </div>
 
         {showOwnerFilter && (
-          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex flex-col gap-1 w-full max-w-xs">
+          <div className="p-4 bg-slate-50 border-b flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location</label>
               <select 
                 value={ownerFilterLocation} 
                 onChange={(e) => setOwnerFilterLocation(e.target.value)}
-                className="input py-2 text-sm bg-white"
+                className="input py-2 text-sm bg-white w-full"
               >
                 <option value="">All Locations</option>
                 {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
@@ -740,13 +740,13 @@ const AdminDashboard = () => {
 
         {/* Filter Bar */}
         {showFilter && (
-          <div className="p-4 bg-slate-50 border-b flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex flex-col gap-1 w-full max-w-xs">
+          <div className="p-4 bg-slate-50 border-b flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filter by Rating</label>
               <select 
                 value={ratingFilter} 
                 onChange={(e) => setRatingFilter(e.target.value)}
-                className="input py-2 text-sm bg-white"
+                className="input py-2 text-sm bg-white w-full"
               >
                 <option value="">All Ratings</option>
                 <option value="5">5 Stars</option>
@@ -913,7 +913,7 @@ const AdminDashboard = () => {
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-[95%] sm:w-full p-6 animate-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-slate-800 mb-2">Delete User</h3>
             <p className="text-slate-600 mb-6">
               Are you sure you want to permanently delete this user? They will no longer be able to access the platform, but their existing data will remain in the admin records. This action cannot be undone.

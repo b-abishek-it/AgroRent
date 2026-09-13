@@ -9,7 +9,7 @@ const PageLayout = () => {
   return (
     <div className="flex min-h-screen min-w-0 flex-col">
       <Navbar />
-      <main className="min-w-0 flex-1">
+      <main className="min-w-0 flex-1 flex flex-col">
         <Outlet />
       </main>
       {!hideFooter && <Footer />}

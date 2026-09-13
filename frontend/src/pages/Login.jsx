@@ -70,7 +70,7 @@ const Login = () => {
   };
 
   return (
-      <div className="mx-auto mt-6 w-full max-w-md px-4 sm:mt-10">
+      <div className="mx-auto my-auto w-full max-w-md px-4 py-6 sm:py-10">
       <div className="card">
         <h2 className="text-2xl font-bold mb-4">{t("loginTitle")}</h2>
         <form onSubmit={submitLogin} className="space-y-3">

@@ -90,7 +90,7 @@ const PaymentPage = () => {
                   <p className="mt-2 text-2xl font-bold text-amber-950">{formatCurrency(pricing.machineRentalCost)}</p>
                 </div>
                 <div className="rounded-xl bg-emerald-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-emerald-700">Admin Commission</p>
+                  <p className="text-xs uppercase tracking-wide text-emerald-700">Platform fees</p>
                   <p className="mt-2 text-2xl font-bold text-emerald-950">{formatCurrency(pricing.adminCommission)}</p>
                 </div>
               </div>

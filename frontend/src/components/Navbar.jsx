@@ -19,44 +19,46 @@ const Navbar = () => {
 
   const navLinks = (
     <>
-      <Link to="/" onClick={closeMenu} className="flex items-center gap-2 p-2 md:px-2 md:py-1.5 text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors" title={t("navHome")}>
+      <Link to="/" onClick={closeMenu} className="flex items-center justify-start md:justify-center gap-2 p-2 md:px-2 md:py-1.5 text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors w-full md:w-auto" title={t("navHome")}>
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
         <span className="md:hidden font-medium">{t("navHome")}</span>
       </Link>
-      <Link to="/search" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center">{t("navSearch")}</Link>
+      <Link to="/search" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-2 md:py-1.5 rounded-lg transition-colors text-sm flex items-center justify-start md:justify-center w-full md:w-auto">{t("navSearch")}</Link>
     </>
   );
 
   const actionButtons = (
     <>
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        aria-label="Toggle language"
-        title={lang === "en" ? t("tamil") : t("english")}
-        className="relative inline-flex h-8 w-[72px] shrink-0 items-center rounded-full border border-slate-300 bg-slate-100 px-1 transition-colors"
-      >
-        <span className="absolute left-2.5 text-[10px] font-bold text-slate-600">EN</span>
-        <span className="absolute right-2.5 text-[10px] font-bold text-slate-600">TA</span>
-        <span className={`h-6 w-8 rounded-full bg-white shadow transition-transform ${lang === "ta" ? "translate-x-8" : "translate-x-0"}`} />
-      </button>
-
       {!user ? (
         <>
-          <Link to="/login" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors text-sm">{t("navLogin")}</Link>
-          <Link to="/register" onClick={closeMenu} className="btn-primary shadow-sm py-1.5 px-4 text-sm">{t("navRegister")}</Link>
+          <Link to="/login" onClick={closeMenu} className="font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 px-3 py-2 md:py-1.5 rounded-lg transition-colors text-sm w-full md:w-auto text-left md:text-center">{t("navLogin")}</Link>
+          <Link to="/register" onClick={closeMenu} className="btn-primary shadow-sm py-2 md:py-1.5 px-4 text-sm w-full md:w-auto text-center">{t("navRegister")}</Link>
         </>
       ) : (
         <>
-          <Link to={user.role === "farmer" ? "/farmer" : user.role === "owner" ? "/owner" : "/admin"} onClick={closeMenu} className="btn-outline bg-white py-1.5 px-4 text-sm">
+          <Link to={user.role === "farmer" ? "/farmer" : user.role === "owner" ? "/owner" : "/admin"} onClick={closeMenu} className="btn-outline bg-white py-2 md:py-1.5 px-4 text-sm w-full md:w-auto text-center">
             {t("navDashboard")}
           </Link>
-          <button onClick={onLogout} className="btn-primary shadow-sm !bg-red-600 hover:!bg-red-700 border-none py-1.5 px-4 text-sm">{t("navLogout")}</button>
+          <button onClick={onLogout} className="btn-primary shadow-sm !bg-red-600 hover:!bg-red-700 border-none py-2 md:py-1.5 px-4 text-sm w-full md:w-auto text-center">{t("navLogout")}</button>
         </>
       )}
+
+      <div className="flex w-full md:w-auto justify-start md:justify-center px-1">
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          aria-label="Toggle language"
+          title={lang === "en" ? t("tamil") : t("english")}
+          className="relative inline-flex h-8 w-[72px] shrink-0 items-center rounded-full border border-slate-300 bg-slate-100 px-1 transition-colors"
+        >
+          <span className="absolute left-2.5 text-[10px] font-bold text-slate-600">EN</span>
+          <span className="absolute right-2.5 text-[10px] font-bold text-slate-600">TA</span>
+          <span className={`h-6 w-8 rounded-full bg-white shadow transition-transform ${lang === "ta" ? "translate-x-8" : "translate-x-0"}`} />
+        </button>
+      </div>
     </>
   );
 
@@ -87,11 +89,11 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute inset-x-0 top-full border-b bg-white px-4 py-5 shadow-lg md:hidden">
+        <div className="absolute inset-x-0 top-full border-b bg-white/95 backdrop-blur-md px-4 py-5 shadow-lg md:hidden z-50">
           <div className="mx-auto flex max-w-6xl flex-col gap-4">
-            <div className="flex flex-col gap-4 px-2">{navLinks}</div>
-            <div className="h-px bg-slate-100 my-2"></div>
-            <div className="flex flex-col gap-4 px-2">{actionButtons}</div>
+            <div className="flex flex-col gap-2 px-2">{navLinks}</div>
+            <div className="h-px bg-slate-200 my-1"></div>
+            <div className="flex flex-col gap-3 px-2">{actionButtons}</div>
           </div>
         </div>
       )}

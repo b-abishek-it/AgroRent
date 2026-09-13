@@ -6,18 +6,18 @@ const Home = () => {
 
   return (
     <>
-      <section className="relative bg-gradient-to-r from-green-50 to-amber-50 py-10 sm:py-14 lg:py-20">
+      <section className="relative bg-gradient-to-r from-green-50 to-amber-50 py-8 sm:py-14 lg:py-20">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 sm:gap-10 md:grid-cols-2">
-          <div>
+          <div className="text-center md:text-left">
             <h1 className="text-3xl font-bold leading-tight text-slate-800 sm:text-4xl lg:text-5xl">
               {t("homeTitle")}
             </h1>
             <p className="mt-4 text-slate-600">
               {t("homeSubtitle")}
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/register" className="btn-primary w-full sm:w-auto">{t("getStarted")}</Link>
-              <Link to="/search" className="btn-outline w-full sm:w-auto">{t("searchMachinery")}</Link>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center md:justify-start">
+              <Link to="/register" className="btn-primary w-full sm:w-auto text-center">{t("getStarted")}</Link>
+              <Link to="/search" className="btn-outline w-full sm:w-auto text-center">{t("searchMachinery")}</Link>
             </div>
           </div>
           <img

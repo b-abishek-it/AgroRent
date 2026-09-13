@@ -258,7 +258,7 @@ After booking approval, the **Proceed to Payment** button becomes available.
 
 - Booking Information
 - Payment Amount
-- Admin Commission
+- Platform fees
 - Machinery Owner Amount
 
 ### Payment Distribution
@@ -324,7 +324,7 @@ The system automatically generates a **PDF Invoice** after successful payment.
 - To Time
 - Duration
 - Total Amount
-- Admin Commission (5%)
+- Platform fees (5%)
 - Machinery Owner Amount (95%)
 - Payment Status
 
@@ -465,7 +465,7 @@ The system provides real-time notifications.
 - FCFS Booking Allocation
 - Razorpay Payment Integration
 - PDF Invoice Generation
-- 5% Admin Commission Calculation
+- 5% Platform fees Calculation
 - 95% Machinery Owner Settlement
 - Booking Cancellation
 - Refund Management
